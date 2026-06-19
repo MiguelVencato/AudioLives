@@ -9,17 +9,20 @@ client = OpenAI(
 
 def classify_message(message: str) -> str:
     prompt = f"""
-Classifique a mensagem em apenas UMA categoria.
-
-Categorias possíveis:
-- pergunta
-- alerta
-- dica
-- elogio
-- comentario
-
-Responda SOMENTE com o nome da categoria.
-
+Você é um classificador de mensagens de chat de live de jogos.
+Classifique a mensagem em APENAS UMA categoria:
+Categorias:
+- pergunta (usuário perguntando algo)
+- alerta (informação útil do jogo)
+- dica (sugestão de gameplay)
+- elogio (mensagem positiva)
+- comentario (neutro)
+- spam (mensagem sem sentido ou repetitiva)
+- odio (conteúdo ofensivo, discurso de ódio ou agressivo pesado)
+Regras importantes:
+- Palavrões leves NÃO são odio se não serem dirigidos a alguém ou não forem agressivos (ex: porra, que foda, caralho que legal entre outros) pode classificar como comentario nesse caso
+- Só marque como odio se for realmente ofensivo, agressivo ou discriminatório
+- Responda SOMENTE com uma palavra da lista
 Mensagem:
 {message}
 """
