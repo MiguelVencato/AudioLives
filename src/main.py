@@ -1,6 +1,4 @@
 from flask import Flask, request, render_template_string
-from threading import Thread
-
 from priority import calculate_priority, should_read
 from tts import speak
 from classifier import classify_message
@@ -128,11 +126,7 @@ def home():
         else:
             if should_read(message):
                 final_message = build_message(user, message, category)
-                Thread(
-                    target=speak,
-                    args=(final_message,),
-                    daemon=True
-                ).start()
+                speak(final_message)
             else:
                 final_message = "Mensagem ignorada por baixa prioridade."
         chat_history.append({
