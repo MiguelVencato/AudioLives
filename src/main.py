@@ -1,141 +1,56 @@
-from flask import Flask, request, render_template_string
-from priority import calculate_priority, should_read
-from tts import speak
+import os
+from twitchio.ext import commands
+from dotenv import load_dotenv
 from classifier import classify_message
+from priority import calculate_priority, should_read
 from templates import build_message
+from tts import speak
 
-app = Flask(__name__)
+load_dotenv()
 
-chat_history = []
+TWITCH_TOKEN = os.getenv("TWITCH_TOKEN")
+CHANNEL_NAME = os.getenv("CHANNEL_NAME")
 
-HTML = """
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Leitor de Chat Inteligente</title>
-    <style>
-        body {
-            background: #0e0e10;
-            color: white;
-            font-family: Arial, sans-serif;
-            max-width: 1000px;
-            margin: auto;
-            padding: 20px;
-        }
-        h1 {
-            text-align: center;
-            color: #9146ff;
-        }
-        .chat {
-            border: 1px solid #444;
-            border-radius: 8px;
-            height: 500px;
-            overflow-y: auto;
-            padding: 15px;
-            margin-bottom: 20px;
-            background: #18181b;
-        }
-        .message {
-            margin-bottom: 15px;
-            padding: 15px;
-            background: #26262c;
-            border-radius: 8px;
-        }
-        .username {
-            color: #9146ff;
-            font-weight: bold;
-            font-size: 16px;
-        }
-        .category {
-            color: #00d084;
-            font-weight: bold;
-        }
-        .tts {
-            color: #ffd166;
-        }
-        input, button {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 10px;
-            border-radius: 6px;
-            border: none;
-            box-sizing: border-box;
-        }
-        button {
-            background: #9146ff;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        button:hover {
-            background: #7d39e0;
-        }
-    </style>
-</head>
-<body>
+class Bot(commands.Bot):
 
-    <h1>🎮 Leitor de Chat Inteligente</h1>
+    def __init__(self):
+        super().__init__(
+            token=TWITCH_TOKEN, 
+            prefix='!', 
+            initial_channels=[CHANNEL_NAME]
+        )
 
-    <div class="chat">
-        {% for msg in history %}
-        <div class="message">
-            <div class="username">{{ msg.user }}</div>
+    async def event_ready(self):
+        print(f'\n Sistema de TTS Rodando! Canal: {CHANNEL_NAME}')
+        print("Aguardando mensagens DESTACADAS (100 pontos)...\n")
 
-            <p><strong>Mensagem:</strong><br>{{ msg.original }}</p>
+    async def event_message(self, message):
+        if message.echo:
+            return
+        msg_id = message.tags.get('msg-id')
+        if msg_id != 'highlighted-message':
+            return
+        user = message.author.name
+        text = message.content
 
-            <p><strong>Score:</strong><br>{{ msg.score }}</p>
+        print(f"[RESGATE POR PONTOS] {user} destacou a mensagem: {text}")
+        score = calculate_priority(text)
+        if not should_read(text):
+            print(f" Mensagem de {user} ignorada por ser curta demais.\n")
+            return
 
-            <p>
-                <strong>Categoria:</strong><br>
-                <span class="category">{{ msg.category }}</span>
-            </p>
+        category = classify_message(text)
+        print(f"📊 Categoria: {category} | Score: {score}")
 
-            <p>
-                <strong>TTS:</strong><br>
-                <span class="tts">{{ msg.final }}</span>
-            </p>
-        </div>
-        {% endfor %}
-    </div>
-
-    <form method="POST">
-        <input type="text" name="user" placeholder="Nome do usuário" required>
-        <input type="text" name="message" placeholder="Digite uma mensagem..." required>
-        <button type="submit">Enviar Mensagem</button>
-    </form>
-
-    <script>
-        const chat = document.querySelector(".chat");
-        chat.scrollTop = chat.scrollHeight;
-    </script>
-
-</body>
-</html>
-"""
-@app.route("/", methods=["GET", "POST"])
-def home():
-
-    if request.method == "POST":
-        user = request.form["user"]
-        message = request.form["message"]
-        score = calculate_priority(message)
-        category = classify_message(message)
         if category in ["odio", "spam"]:
-            final_message = "Mensagem removida pelo sistema de moderação."
+            print(f"🛡️ [MODERAÇÃO] Mensagem de {user} bloqueada por {category.upper()}.\n")
+            return
+        final_message = build_message(user, text, category)
+        print(f"🔊 Falando com voz de IA: \"{final_message}\"\n")
+        speak(final_message)
 
-        else:
-            if should_read(message):
-                final_message = build_message(user, message, category)
-                speak(final_message)
-            else:
-                final_message = "Mensagem ignorada por baixa prioridade."
-        chat_history.append({
-            "user": user,
-            "original": message,
-            "score": score,
-            "category": category,
-            "final": final_message
-        })
-    return render_template_string(HTML, history=chat_history)
+        await self.handle_commands(message)
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    bot = Bot()
+    bot.run()
