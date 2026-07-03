@@ -4,7 +4,7 @@ Este projeto é um sistema automatizado de Text-to-Speech (TTS) integrado ao cha
 
 ---
 
-## 📋 Passo a Passo para Configuração e Execução
+## Etapas para Configuração e Execução
 
 Siga as etapas abaixo no seu terminal para colocar o sistema para rodar:
 
@@ -47,7 +47,7 @@ python src/main.py
 
 ---
 
-## 🎯 Etapa 5: Como Testar o Funcionamento
+## Etapa 5: Como Testar o Funcionamento
 
 1. Assim que o bot inicializar com sucesso no seu terminal, ele exibirá a seguinte mensagem de confirmação:  
    `🤖 Sistema de TTS por Pontos Conectado! Canal: Fiiiirezada`
