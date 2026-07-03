@@ -1,6 +1,6 @@
 # AudioLives - Leitor de Chat Inteligente com Voz de IA
 
-Este projeto é um sistema automatizado de Text-to-Speech (TTS) integrado ao chat da Twitch. Ele monitora mensagens destacadas por pontos do canal, utiliza Inteligência Artificial (OpenRouter) para categorizar e moderar o conteúdo em tempo real (bloqueando conteúdos nocivos) e reproduz o texto usando uma voz neural masculina realista.
+Este projeto é um sistema automatizado de Text-to-Speech (TTS) integrado ao chat da Twitch. Ele monitora mensagens destacadas por pontos do canal, utiliza Inteligência Artificial (OpenRouter) para categorizar e moderar o conteúdo em tempo real (bloqueando conteúdos nocivos) e reproduz o texto usando uma voz neural realista.
 
 ---
 
@@ -25,7 +25,7 @@ pip install -r requirements.txt
 Crie um arquivo chamado exatamente **`.env`** na raiz do projeto (na mesma pasta onde está este arquivo README) e configure as suas chaves. 
 
 Se quiser testar no seu próprio canal da Twitch, siga as instruções para gerar as credenciais:
-1. **CHANNEL_NAME:** Altere para o nome do seu canal da Twitch (por padrão, está configurado para a live do `Fiiiirezada`).
+1. **CHANNEL_NAME:** Altere para o nome do seu canal da Twitch (por padrão, está configurado para minha live, `Fiiiirezada`).
 2. **TWITCH_TOKEN:** Acesse o site [twitchtokengenerator.com](https://twitchtokengenerator.com/), marque as permissões (`Scopes`) de `chat:read` e `chat:edit`, clique em gerar e copie o **Access Token**. Cole no arquivo sempre começando com `oauth:`.
 
 O arquivo `.env` deve ficar neste formato:
@@ -35,7 +35,7 @@ OPENROUTER_API_KEY=chave_openrouter
 MODEL_NAME=openai/gpt-oss-120b:free
 
 # Configurações do Chat da Twitch
-CHANNEL_NAME=Fiiiirezada
+CHANNEL_NAME=sua_twitch
 TWITCH_TOKEN=oauth:seu_token_twitch
 ```
 
